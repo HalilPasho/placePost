@@ -1,20 +1,25 @@
 import React, { useRef, useEffect } from 'react';
-
+import { loadGoogleMaps } from '../../util/loadGoogleMaps';
 import './Map.css';
 
-const Map = props => {
+const Map = (props) => {
   const mapRef = useRef();
-  
   const { center, zoom } = props;
 
   useEffect(() => {
-    const map = new window.google.maps.Map(mapRef.current, {
-      center: center,
-      zoom: zoom
-    });
-  
-    new window.google.maps.Marker({ position: center, map: map });
-  }, [center, zoom]);  
+    loadGoogleMaps()
+      .then(() => {
+        const map = new window.google.maps.Map(mapRef.current, {
+          center,
+          zoom,
+        });
+
+        new window.google.maps.Marker({ position: center, map });
+      })
+      .catch((err) => {
+        console.error('Failed to load Google Maps script', err);
+      });
+  }, [center, zoom]);
 
   return (
     <div

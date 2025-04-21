@@ -1,5 +1,7 @@
 const httpError = require('../models/httpError');
 const { v4: uuidv4 } = require('uuid');
+const getAddressFromCoords = require('../location');
+const { validationResult } = require('express-validator');
 
 const DUMMY_PLACES = [
   {
@@ -47,8 +49,19 @@ const findPlacesByUserId = (req, res, next) => {
   res.json({ places: foundPlaces });
 };
 
-const createPlace = (req, res, next) => {
-  const { description, title, coordinates, creator, address } = req.body;
+const createPlace = async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return next(new httpError('Invalid inputs', 422));
+  }
+  const { title, description, address, creator } = req.body;
+
+  let coordinates;
+  try {
+    coordinates = await getAddressFromCoords(address);
+  } catch (err) {
+    return next(err);
+  }
   const newPlace = {
     description,
     id: uuidv4(),
@@ -58,11 +71,39 @@ const createPlace = (req, res, next) => {
     address,
   };
   DUMMY_PLACES.push(newPlace);
-  console.log('AAA', DUMMY_PLACES);
 
   res.status(201).json({ place: newPlace });
+};
+
+const updatePlace = (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return next(new httpError('Invalid inputs for updating', 422));
+  }
+  const { description, title } = req.body;
+  const placeId = req.params.pid;
+
+  const updatePlaceData = { ...DUMMY_PLACES.find((p) => p.id === placeId) };
+  const placeIndex = DUMMY_PLACES.findIndex((p) => p.id === placeId);
+
+  updatePlaceData.description = description;
+  updatePlaceData.title = title;
+  DUMMY_PLACES[placeIndex] = updatePlaceData;
+  res.status(200).json({ place: updatePlaceData });
+};
+
+const deletePlace = (req, res, next) => {
+  const deletedPlace = req.params.pid;
+  if (!DUMMY_PLACES.find((p) => p.id === deletedPlace))
+    return next(new httpError('Could not find place to delete', 404));
+
+  const placeIndex = DUMMY_PLACES.findIndex((p) => p.id === deletedPlace);
+  DUMMY_PLACES.splice(placeIndex, 1);
+  res.status(200).json({ message: 'Place deleted' });
 };
 
 exports.findPlacesById = findPlacesById;
 exports.findPlacesByUserId = findPlacesByUserId;
 exports.createPlace = createPlace;
+exports.updatePlace = updatePlace;
+exports.deletePlace = deletePlace;

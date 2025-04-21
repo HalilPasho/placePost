@@ -2,8 +2,10 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const app = express();
 const httpError = require('./models/httpError');
+require('dotenv').config();
 
 const placesRoute = require('./routes/placesRoute');
+const userRoute = require('./routes/usersRoute');
 
 const PORT = process.env.PORT || 5000;
 
@@ -11,6 +13,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
 app.use('/places', placesRoute);
+app.use('/user', userRoute);
 
 app.use((req, res, next) => {
   const error = new httpError('Page router was not found', 404);

@@ -1,5 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
 const app = express();
 const httpError = require('./models/httpError');
 require('dotenv').config();
@@ -16,8 +17,7 @@ app.use('/places', placesRoute);
 app.use('/user', userRoute);
 
 app.use((req, res, next) => {
-  const error = new httpError('Page router was not found', 404);
-  throw error;
+  throw new httpError('Page router was not found', 404);
 });
 
 app.use((error, req, res, next) => {
@@ -30,17 +30,14 @@ app.use((error, req, res, next) => {
   });
 });
 
-app
-  .listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+mongoose
+  .connect(process.env.MONGODB_URI)
+  .then(() => {
+    console.log('Connected to MongoDB');
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
   })
-  .on('error', (err) => {
-    if (err.code === 'EADDRINUSE') {
-      console.error(
-        `Port ${PORT} is already in use. Kill the process or use another port.`
-      );
-      process.exit(1);
-    } else {
-      throw err;
-    }
+  .catch((err) => {
+    console.log(err);
   });

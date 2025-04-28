@@ -2,6 +2,7 @@ const httpError = require('../models/httpError');
 const { v4: uuidv4 } = require('uuid');
 const getAddressFromCoords = require('../location');
 const { validationResult } = require('express-validator');
+const Places = require('../models/place');
 
 const DUMMY_PLACES = [
   {
@@ -28,14 +29,20 @@ const DUMMY_PLACES = [
   },
 ];
 
-const findPlacesById = (req, res, next) => {
+const findPlacesById = async (req, res, next) => {
   const placeId = req.params.pid;
-  const foundPlace = DUMMY_PLACES.find((p) => p.id === placeId);
+  let foundPlace;
+  try {
+    foundPlace = await Places.findById(placeId);
+  } catch (err) {
+    return next(new httpError('Please provide a place ID', 400));
+  }
+
   if (!foundPlace) {
     return next(new httpError('Place not found', 404));
   }
 
-  res.json({ place: foundPlace });
+  res.json({ place: foundPlace.toObject({ getters: true }) });
 };
 
 const findPlacesByUserId = (req, res, next) => {
@@ -62,15 +69,19 @@ const createPlace = async (req, res, next) => {
   } catch (err) {
     return next(err);
   }
-  const newPlace = {
+  const newPlace = new Places({
     description,
-    id: uuidv4(),
     title,
     location: coordinates,
     creator,
     address,
-  };
-  DUMMY_PLACES.push(newPlace);
+    image: 'https://via.placeholder.com/150',
+  });
+  try {
+    newPlace.save();
+  } catch (err) {
+    return next(new httpError('Could not create new place', 500));
+  }
 
   res.status(201).json({ place: newPlace });
 };

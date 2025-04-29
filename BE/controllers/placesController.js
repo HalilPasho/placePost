@@ -1,5 +1,4 @@
 const httpError = require('../models/httpError');
-const { v4: uuidv4 } = require('uuid');
 const getAddressFromCoords = require('../location');
 const { validationResult } = require('express-validator');
 const Places = require('../models/place');
@@ -45,15 +44,21 @@ const findPlacesById = async (req, res, next) => {
   res.json({ place: foundPlace.toObject({ getters: true }) });
 };
 
-const findPlacesByUserId = (req, res, next) => {
+const findPlacesByUserId = async (req, res, next) => {
   const userId = req.params.uid;
-  const foundPlaces = DUMMY_PLACES.filter((p) => p.creator === userId);
+  let foundPlaces;
 
-  if (foundPlaces.length === 0) {
-    return next(new httpError('Places not found', 404));
+  try {
+    foundPlaces = await Places.find({ creator: userId });
+  } catch (err) {
+    return next(new httpError('Please provide a user ID', 400));
   }
 
-  res.json({ places: foundPlaces });
+  if (foundPlaces.length === 0) {
+    return next(new httpError('Places not found for this user', 404));
+  }
+
+  res.json({ places: foundPlaces.map((p) => p.toObject({ getters: true })) });
 };
 
 const createPlace = async (req, res, next) => {

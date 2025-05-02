@@ -8,21 +8,24 @@ router.get('/user/:uid', placesController.findPlacesByUserId);
 
 router.get('/:pid', placesController.findPlacesById);
 
-router.patch(
-  '/:pid',
-  [check('title').not().isEmpty(), check('description').isLength({ min: 5 })],
-  placesController.updatePlace
-);
+const validatePlaceInput = [
+  check('title').notEmpty().withMessage('Title must not be empty.'),
+  check('description')
+    .isLength({ min: 5 })
+    .withMessage('Description must be at least 5 characters long.'),
+  check('address').notEmpty().withMessage('Address must not be empty.'),
+];
 
-router.post(
-  '/',
-  [
-    check('title').not().isEmpty(),
-    check('description').isLength({ min: 5 }),
-    check('address').not().isEmpty(),
-  ],
-  placesController.createPlace
-);
+const validateUpdatePlace = [
+  check('title').notEmpty().withMessage('Title must not be empty.'),
+  check('description')
+    .isLength({ min: 5 })
+    .withMessage('Description must be at least 5 characters long.'),
+];
+
+router.patch('/:pid', ...validateUpdatePlace, placesController.updatePlace);
+
+router.post('/', ...validatePlaceInput, placesController.createPlace);
 
 router.delete('/:pid', placesController.deletePlace);
 

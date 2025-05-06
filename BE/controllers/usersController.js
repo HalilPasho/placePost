@@ -19,7 +19,7 @@ const signup = async (req, res, next) => {
   if (!errors.isEmpty()) {
     return next(new httpError('Invalid inputs for signup', 422));
   }
-  const { name, email, password, surname } = req.body;
+  const { name, email, password } = req.body;
 
   let existingUser;
 
@@ -36,7 +36,6 @@ const signup = async (req, res, next) => {
 
   const createUser = new Users({
     name,
-    surname,
     email,
     image: 'https://via.placeholder.com/150',
     password,

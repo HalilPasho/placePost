@@ -57,7 +57,8 @@ const createPlace = async (req, res, next) => {
     location: coordinates,
     creator,
     address,
-    image: 'https://via.placeholder.com/150',
+    image:
+      'https://www.sphinx-solution.com/blog/wp-content/uploads/2023/07/examples-of-web-applications-2.webp',
   });
 
   let user;

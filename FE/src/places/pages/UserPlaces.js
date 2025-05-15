@@ -23,11 +23,17 @@ const UserPlaces = () => {
     };
     fetchPlaces();
   }, [sendRequest, userId]);
+
+  const onDeleteHandler = async (placeId) => {
+    setLoadedPlaces(loadedPlaces.filter((place) => place.id !== placeId));
+  };
   return (
     <Fragment>
       <ErrorModal error={error} onClear={clearError} />
       {isLoading && <LoadingSpinner asOverlay />}
-      {loadedPlaces && <PlaceList items={loadedPlaces} />}
+      {loadedPlaces && (
+        <PlaceList items={loadedPlaces} onDelete={onDeleteHandler} />
+      )}
     </Fragment>
   );
 };

@@ -1,5 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const fs = require('fs');
 const mongoose = require('mongoose');
 const app = express();
 const httpError = require('./models/httpError');
@@ -24,6 +25,7 @@ app.use((req, res, next) => {
 });
 
 app.use(bodyParser.json());
+app.use('/uploads/images', express.static(__dirname + '/uploads/images'));
 app.use(bodyParser.urlencoded({ extended: false }));
 
 app.use('/places', placesRoute);
@@ -34,6 +36,11 @@ app.use((req, res, next) => {
 });
 
 app.use((error, req, res, next) => {
+  if (req.file) {
+    fs.unlink(req.file.path, (err) => {
+      console.log(err);
+    });
+  }
   if (res.headersSent) {
     return next(error);
   }

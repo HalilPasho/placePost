@@ -37,7 +37,7 @@ const signup = async (req, res, next) => {
   const createUser = new Users({
     name,
     email,
-    image: 'https://via.placeholder.com/150',
+    image: req.file.path,
     password,
     places: [],
   });
@@ -69,12 +69,10 @@ const login = async (req, res, next) => {
   if (!existingUser || existingUser.password !== password) {
     return next(new httpError('Invalid credentials', 401));
   }
-  res
-    .status(201)
-    .json({
-      message: 'Logged in!',
-      user: existingUser.toObject({ getters: true }),
-    });
+  res.status(201).json({
+    message: 'Logged in!',
+    user: existingUser.toObject({ getters: true }),
+  });
 };
 
 exports.getUsers = getUsers;

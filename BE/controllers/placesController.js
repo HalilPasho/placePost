@@ -1,4 +1,5 @@
 const httpError = require('../models/httpError');
+const fs = require('fs');
 const getAddressFromCoords = require('../location');
 const { validationResult } = require('express-validator');
 const Places = require('../models/place');
@@ -57,8 +58,7 @@ const createPlace = async (req, res, next) => {
     location: coordinates,
     creator,
     address,
-    image:
-      'https://www.sphinx-solution.com/blog/wp-content/uploads/2023/07/examples-of-web-applications-2.webp',
+    image: req.file.path,
   });
 
   let user;
@@ -127,7 +127,7 @@ const deletePlace = async (req, res, next) => {
   if (!place) {
     return next(new httpError('Could not find place to delete', 404));
   }
-
+  const imagePath = place.image;
   try {
     const sess = await mongoose.startSession();
     sess.startTransaction();
@@ -138,6 +138,10 @@ const deletePlace = async (req, res, next) => {
   } catch (err) {
     return next(new httpError('Could not delete place', 500));
   }
+
+  fs.unlink(imagePath, (err) => {
+    console.log("Image couldn't be deleted", err);
+  });
 
   res.status(200).json({ message: 'Place deleted' });
 };

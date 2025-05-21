@@ -16,7 +16,7 @@ import { AuthContext } from '../../shared/context/auth-context';
 
 const NewPlace = () => {
     const { error, isLoading, sendRequest, clearError } = useHttpClient();
-    const { userId, token } = useContext(AuthContext);
+    const { token } = useContext(AuthContext);
     const [formState, inputHandler] = useForm(
         {
             title: {
@@ -48,7 +48,7 @@ const NewPlace = () => {
             formData.append('title', formState.inputs.title.value);
             formData.append('description', formState.inputs.description.value);
             formData.append('address', formState.inputs.address.value);
-            formData.append('creator', userId);
+
             await sendRequest(
                 'http://localhost:5000/places',
                 'POST',

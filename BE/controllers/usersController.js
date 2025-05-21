@@ -77,7 +77,7 @@ const signup = async (req, res, next) => {
     }
 
     res.status(201).json({
-        useeId: createUser.id,
+        userId: createUser.id,
         token,
         email: createUser.email,
     });

@@ -70,7 +70,7 @@ const Auth = () => {
         if (isLoginMode) {
             try {
                 const responseData = await sendRequest(
-                    'http://localhost:5000/user/login',
+                    `${process.env.REACT_APP_BACKEND_API}/user/login`,
                     'POST',
                     JSON.stringify({
                         email: formState.inputs.email.value,
@@ -93,7 +93,7 @@ const Auth = () => {
                 formData.append('email', formState.inputs.email.value);
                 formData.append('password', formState.inputs.password.value);
                 const responseData = await sendRequest(
-                    'http://localhost:5000/user/signup',
+                    `${process.env.REACT_APP_BACKEND_API}/user/signup`,
                     'POST',
                     formData
                 );

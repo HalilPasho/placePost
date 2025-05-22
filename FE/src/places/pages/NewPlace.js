@@ -50,7 +50,7 @@ const NewPlace = () => {
             formData.append('address', formState.inputs.address.value);
 
             await sendRequest(
-                'http://localhost:5000/places',
+                `${process.env.REACT_APP_BACKEND_API}/places`,
                 'POST',
                 formData,
                 {

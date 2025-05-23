@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const fs = require('fs');
 const mongoose = require('mongoose');
+const path = require('path');
 const app = express();
 const httpError = require('./models/httpError');
 require('dotenv').config();
@@ -10,6 +11,9 @@ const placesRoute = require('./routes/placesRoute');
 const userRoute = require('./routes/usersRoute');
 
 const PORT = process.env.PORT || 5000;
+
+const uploadPath = path.join(__dirname, 'uploads/images');
+fs.mkdirSync(uploadPath, { recursive: true });
 
 app.use((req, res, next) => {
     res.setHeader(

@@ -14,7 +14,6 @@ import {
 import { useForm } from '../../shared/hooks/form-hook';
 import { AuthContext } from '../../shared/context/auth-context';
 import './Auth.css';
-import ImageUpload from '../../shared/components/FormElements/ImageUpload';
 
 const Auth = () => {
     const auth = useContext(AuthContext);
@@ -40,7 +39,6 @@ const Auth = () => {
                 {
                     ...formState.inputs,
                     name: undefined,
-                    image: undefined,
                 },
                 formState.inputs.email.isValid &&
                     formState.inputs.password.isValid
@@ -51,10 +49,6 @@ const Auth = () => {
                     ...formState.inputs,
                     name: {
                         value: '',
-                        isValid: false,
-                    },
-                    image: {
-                        value: null,
                         isValid: false,
                     },
                 },
@@ -87,15 +81,17 @@ const Auth = () => {
             }
         } else {
             try {
-                const formData = new FormData();
-                formData.append('image', formState.inputs.image.value);
-                formData.append('name', formState.inputs.name.value);
-                formData.append('email', formState.inputs.email.value);
-                formData.append('password', formState.inputs.password.value);
                 const responseData = await sendRequest(
                     `${process.env.REACT_APP_BACKEND_API}/user/signup`,
                     'POST',
-                    formData
+                    JSON.stringify({
+                        name: formState.inputs.name.value,
+                        email: formState.inputs.email.value,
+                        password: formState.inputs.password.value,
+                    }),
+                    {
+                        'Content-Type': 'application/json',
+                    }
                 );
 
                 auth.login(responseData.userId, responseData.token);
@@ -122,14 +118,6 @@ const Auth = () => {
                             validators={[VALIDATOR_REQUIRE()]}
                             errorText="Please enter a name."
                             onInput={inputHandler}
-                        />
-                    )}
-                    {!isLoginMode && (
-                        <ImageUpload
-                            center
-                            id={'image'}
-                            onInput={inputHandler}
-                            onError={'Please enter a valid image.'}
                         />
                     )}
                     <Input

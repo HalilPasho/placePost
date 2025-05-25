@@ -18,7 +18,6 @@ const PlaceItem = (props) => {
         address,
         coordinates,
         description,
-        image,
         title,
     } = props;
     const { userId, token } = useContext(AuthContext);
@@ -93,12 +92,6 @@ const PlaceItem = (props) => {
             <li className="place-item">
                 <Card className="place-item__content">
                     {isLoading && <LoadingSpinner asOverlay />}
-                    <div className="place-item__image">
-                        <img
-                            src={`${process.env.REACT_APP_BACKEND_API}/${image}`}
-                            alt={title}
-                        />
-                    </div>
                     <div className="place-item__info">
                         <h2>{title}</h2>
                         <h3>{address}</h3>

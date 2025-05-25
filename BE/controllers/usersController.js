@@ -17,70 +17,48 @@ const getUsers = async (req, res, next) => {
 };
 
 const signup = async (req, res, next) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return next(new httpError('Invalid inputs for signup', 422));
-    }
-    const { name, email, password } = req.body;
-
-    let existingUser;
-
     try {
-        existingUser = await Users.findOne({ email });
-    } catch (err) {
-        return next(
-            new httpError('Sign up failed, please try again later.', 500)
-        );
-    }
+        console.log('📥 Signup request body:', req.body);
 
-    if (existingUser)
-        return next(
-            new httpError('The provided email address is already in use.', 422)
-        );
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            console.log('❌ Validation errors:', errors);
+            return next(new httpError('Invalid inputs for signup', 422));
+        }
 
-    let hashedPassword;
-    try {
-        hashedPassword = await bcrypt.hash(password, 12);
-    } catch (err) {
-        return next(
-            new httpError('Sign up failed, please try again later.', 500)
-        );
-    }
+        const { name, email, password } = req.body;
 
-    const createUser = new Users({
-        name,
-        email,
-        image: req.file.path,
-        password: hashedPassword,
-        places: [],
-    });
+        let existingUser = await Users.findOne({ email });
+        if (existingUser) {
+            return next(new httpError('Email already in use.', 422));
+        }
 
-    try {
+        const hashedPassword = await bcrypt.hash(password, 12);
+
+        const createUser = new Users({
+            name,
+            email,
+            password: hashedPassword,
+            places: [],
+        });
+
         await createUser.save();
-    } catch (err) {
-        return next(
-            new httpError('Sign up failed, please try again later.', 500)
-        );
-    }
 
-    let token;
-    try {
-        token = jwt.sign(
+        const token = jwt.sign(
             { userId: createUser.id, email: createUser.email },
             process.env.JWT_SECRET,
             { expiresIn: '1h' }
         );
-    } catch (err) {
-        return next(
-            new httpError('Sign up failed, please try again later.', 500)
-        );
-    }
 
-    res.status(201).json({
-        userId: createUser.id,
-        token,
-        email: createUser.email,
-    });
+        res.status(201).json({
+            userId: createUser.id,
+            token,
+            email: createUser.email,
+        });
+    } catch (err) {
+        console.error('🔥 Unexpected signup error:', err);
+        return next(new httpError('Signup failed unexpectedly.', 500));
+    }
 };
 
 const login = async (req, res, next) => {

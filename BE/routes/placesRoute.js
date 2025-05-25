@@ -1,7 +1,7 @@
 const express = require('express');
 const { check } = require('express-validator');
 const placesController = require('../controllers/placesController');
-const fileUpload = require('../middleware/file-upload');
+
 const auth = require('../middleware/check-auth');
 
 const router = express.Router();
@@ -29,12 +29,7 @@ router.use(auth);
 
 router.patch('/:pid', ...validateUpdatePlace, placesController.updatePlace);
 
-router.post(
-    '/',
-    fileUpload.single('image'),
-    ...validatePlaceInput,
-    placesController.createPlace
-);
+router.post('/', ...validatePlaceInput, placesController.createPlace);
 
 router.delete('/:pid', placesController.deletePlace);
 
